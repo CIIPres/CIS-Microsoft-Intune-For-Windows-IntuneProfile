@@ -1,12 +1,24 @@
 # Configuration
 $intune_policy_name = "CIS Baseline Microsoft Intune for Windows 11 v3.0.1 (Ameliorations)"
 $intune_policy_description = "These settings are not defined in the CIS benchmark, but provide additional hardening/privacy configurations."
-$tenant_id = "" #Read-Host " "
-$webSignInAllowedUrls = "mydomain.com" # separate each url with a semicolon
+$tenant_id = "" # Your Azure tenant ID
+$webSignInAllowedUrls = "" # separate each url with a semicolon
 
 # End Config
 ############
 Import-Module Microsoft.Graph.Beta.DeviceManagement
+
+# Prompt for tenant ID if not set
+if ($tenant_id -eq "") {
+  Write-Host "Azure tenant id not set in script. Prompting for input."
+  $tenant_id = Read-Host "Enter your Tenant ID"
+}
+
+# Prompt for web signin domain if not set
+if ($webSignInAllowedUrls -eq "") {
+  Write-Host "Web signin domain not set in script. Prompting for input."
+  $webSignInAllowedUrls = Read-Host "Enter your web signin domain (e.g., mydomain.com)"
+}
 
 if ($tenant_id -eq "") {
   Write-Host "Please configure your Azure tenant id."
@@ -159,10 +171,10 @@ $params = @{
     @{
         # https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-Power?WT.mc_id=Portal-fx#selectlidcloseactionpluggedin
         "@odata.type" = "#microsoft.graph.omaSettingString"
-        "displayName" = "Time Language Settings - Configure Time Zone to Central Standard Time (CST)"
+        "displayName" = "Time Language Settings - Configure Time Zone to Eastern Standard Time (EST)"
         "description" = "Specifies the time zone to be applied to the device. This is the standard Windows name for the target time zone."
         "omaUri" = "./Device/Vendor/MSFT/Policy/Config/TimeLanguageSettings/ConfigureTimeZone"
-        "value" = "Central Standard Time"
+        "value" = "Eastern Standard Time"
     },
     @{
         # https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-Browser?WT.mc_id=Portal-fx#configuretelemetryformicrosoft365analytics
@@ -215,5 +227,5 @@ $params = @{
   )
 }
 
-Connect-MgGraph
+Connect-MgGraph -TenantId $tenant_id -Scopes "DeviceManagementConfiguration.ReadWrite.All"
 New-MgBetaDeviceManagementDeviceConfiguration -BodyParameter $params

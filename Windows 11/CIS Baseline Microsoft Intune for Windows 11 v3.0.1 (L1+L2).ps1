@@ -1,12 +1,20 @@
 # Configuration
 $tenant_id = "" #Read-Host " "
 $logon_title = "Login"
-$logon_message = "This computer system is managed by Acme, Inc. Access is hereby granted for authorized use only. By using this system, you acknowledge notice and acceptance of the Acme Acceptable Use Policy."
+$logon_company_name = "" #Read-Host " "
+$logon_message = "This computer system is managed by ACME. Access is hereby granted for authorized use only. By using this system, you acknowledge notice and acceptance of the ACME Acceptable Use Policy."
 $intune_policy_name = "CIS Baseline Microsoft Intune for Windows 11 v3.0.1 (L1+L2)"
 $intune_policy_description = "Primary CIS Baseline Policy implemented using OMAURI."
 
+
 # End Config
 ############
+
+$tenant_id = Read-Host "Enter your Tenant ID"
+$logon_company_name = Read-Host "Enter your Company Name for the disclaimer"
+
+# Update the logon_message with the company name
+$logon_message = $logon_message -replace "ACME", $logon_company_name
 
 if ($tenant_id -eq "") {
   Write-Host "Please configure your Azure tenant id."
@@ -1382,9 +1390,9 @@ $params = @{
     @{
         "@odata.type" = "#microsoft.graph.omaSettingInteger"
         "displayName" = "24.3 (L1) Ensure 'Device Password History' is set to '24 or more password(s)'' (Automated)"
-        "description" = "Opposed."
+        "description" = "Implemented."
         "omaUri" = "./Device/Vendor/MSFT/Policy/Config/DeviceLock/DevicePasswordHistory"
-        "value" = 0
+        "value" = 24
     },
     # This configuration option is set by Intune, but is not used if Windows Hello for Business is being used. This results in audit failure. CIS does not have a recommendation for PIN complexity for Windows Hello. Additionally, I prefer all numerical for PINs when using WHfB.
     @{
